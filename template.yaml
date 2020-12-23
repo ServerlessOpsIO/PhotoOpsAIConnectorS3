@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: S3 connector to PhotoOpsAI platform
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: "Name of service"
+    Default: "PhotoOpsAIConnectorS3"
+
+  ServiceEnv:
+    Type: String
+    Description: "Name of deployment environment"
+    Default: "prime"
+
+  LogLevel:
+    Type: String
+    Description: "Log level for functions; used internally in code."
+    Default: 'INFO'
+    AllowedValues:
+      - 'DEBUG'
+      - 'INFO'
+      - 'WARNING'
+      - 'ERROR'
+      - 'CRITICAL'
+
+  XRaySDKEnabled:
+    Type: String
+    Description: "AWS X-RAY SDK enabled"
+    Default: 'Disabled'
+    AllowedValues:
+      - 'Enabled'
+      - 'Disabled'
+
+  XRayTracingMode:
+    Type: String
+    Description: "AWS XRay tracing mode"
+    Default: PassThrough
+    AllowedValues:
+      - Active
+      - PassThrough
+
+
+
+Mappings:
+  XRaySDKEnabled:
+    Enabled:
+      Enabled: "true"
+    Disabled:
+      Enabled: "false"
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        LOG_LEVEL:
+          Ref: LogLevel
+        AWS_XRAY_SDK_ENABLED:
+          Fn::FindInMap:
+            - XRaySDKEnabled
+            - Ref: XRaySDKEnabled
+            - Enabled
+    Tags:
+      ServiceName: !Ref ServiceName
+      ServiceEnv: !Ref ServiceEnv
+    Tracing: !Ref XRayTracingMode
+
+
+Resources:
+
+
+
+
+
+
+  CloudWatchTopic:
+    Type: AWS::SNS::Topic
+
+
+Outputs:
+
+
+
+
+  CloudWatchTopicArn:
+    Description: "ARN of CloudWatch topic"
+    Value:
+      Ref: CloudWatchTopic
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-CloudWatchTopicArn"
+
