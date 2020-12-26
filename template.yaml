@@ -28,6 +28,13 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "photoopsai-${ServiceEnv}-${AWS::AccountId}"
+      Tags:
+        # NOTE: Used by PhotoOpsAI to figure out owner of bucket which is not
+        # otherwise possible using AWS APIs.
+        #
+        # FIXME: We can get rid of this. Bucket and key will be unique enough.
+        - Key: "x-PhotoOpsAI-AWS-AccountId"
+          Value: !Sub "${AWS::AccountId}"
       NotificationConfiguration:
         TopicConfigurations:
           - Event: "s3:ObjectCreated:*"
@@ -52,6 +59,12 @@ Resources:
               AWS: !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:root"
             Action: s3:GetObject
             Resource: !Sub "${S3Bucket.Arn}/*"
+          - Sid: "PhotoOpsAIGetBucketTags"
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:root"
+            Action: s3:GetBucketTagging
+            Resource: !Sub "${S3Bucket.Arn}"
 
 
 Outputs:
