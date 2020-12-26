@@ -13,80 +13,49 @@ Parameters:
     Description: "Name of deployment environment"
     Default: "prime"
 
-  LogLevel:
+  PhotoOpsAIAccountId:
     Type: String
-    Description: "Log level for functions; used internally in code."
-    Default: 'INFO'
-    AllowedValues:
-      - 'DEBUG'
-      - 'INFO'
-      - 'WARNING'
-      - 'ERROR'
-      - 'CRITICAL'
+    Description: "AWS account ID for PhotoOpsAI"
+    Default: "355364402302"
 
-  XRaySDKEnabled:
+  PhotoOpsAISnsTopicArn:
     Type: String
-    Description: "AWS X-RAY SDK enabled"
-    Default: 'Disabled'
-    AllowedValues:
-      - 'Enabled'
-      - 'Disabled'
-
-  XRayTracingMode:
-    Type: String
-    Description: "AWS XRay tracing mode"
-    Default: PassThrough
-    AllowedValues:
-      - Active
-      - PassThrough
-
-
-
-Mappings:
-  XRaySDKEnabled:
-    Enabled:
-      Enabled: "true"
-    Disabled:
-      Enabled: "false"
-
-Globals:
-  Function:
-    Environment:
-      Variables:
-        LOG_LEVEL:
-          Ref: LogLevel
-        AWS_XRAY_SDK_ENABLED:
-          Fn::FindInMap:
-            - XRaySDKEnabled
-            - Ref: XRaySDKEnabled
-            - Enabled
-    Tags:
-      ServiceName: !Ref ServiceName
-      ServiceEnv: !Ref ServiceEnv
-    Tracing: !Ref XRayTracingMode
-
+    Description: "ARN of PhotoOpsAI SNS Topic"
+    Default: "arn:aws:sns:us-east-1:355364402302:PhotoOps-tom-PhotoOpsIngestTopic-MN59XIN0X5CB"
 
 Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "photoopsai-${ServiceEnv}-${AWS::AccountId}"
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: "images/"
+            Topic: !Ref PhotoOpsAISnsTopicArn
 
-
-
-
-
-
-  CloudWatchTopic:
-    Type: AWS::SNS::Topic
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Id: "Read"
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "PhotoOpsAIGetData"
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:root"
+            Action: s3:GetObject
+            Resource: !Sub "${S3Bucket.Arn}/*"
 
 
 Outputs:
-
-
-
-
-  CloudWatchTopicArn:
-    Description: "ARN of CloudWatch topic"
+  S3BucketName:
+    Description: "Name of S3 Bucket"
     Value:
-      Ref: CloudWatchTopic
-    Export:
-      Name:
-        Fn::Sub: "${AWS::StackName}-CloudWatchTopicArn"
-
+      Ref: S3Bucket
