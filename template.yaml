@@ -18,6 +18,11 @@ Parameters:
     Description: "AWS account ID for PhotoOpsAI"
     Default: "355364402302"
 
+  PhotoOpsAIRoleName:
+    Type: String
+    Description: "AWS Role name used by PhotoOpsAI"
+    Default: "PhotoOpsAI/PhotoOps-tom-GetExifData"
+
   PhotoOpsAISnsTopicArn:
     Type: String
     Description: "ARN of PhotoOpsAI SNS Topic"
@@ -56,13 +61,22 @@ Resources:
           - Sid: "PhotoOpsAIGetData"
             Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:root"
+              AWS:
+                - !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:role/${PhotoOpsAIRoleName}"
             Action: s3:GetObject
             Resource: !Sub "${S3Bucket.Arn}/*"
+          - Sid: "PhotoOpsAIListBucket"
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:role/${PhotoOpsAIRoleName}"
+            Action: s3:ListBucket
+            Resource: !Sub "${S3Bucket.Arn}"
           - Sid: "PhotoOpsAIGetBucketTags"
             Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:root"
+              AWS:
+                - !Sub "arn:aws:iam::${PhotoOpsAIAccountId}:role/${PhotoOpsAIRoleName}"
             Action: s3:GetBucketTagging
             Resource: !Sub "${S3Bucket.Arn}"
 
