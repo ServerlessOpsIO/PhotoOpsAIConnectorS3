@@ -21,7 +21,7 @@ Parameters:
   PhotoOpsAISnsTopicArn:
     Type: String
     Description: "ARN of PhotoOpsAI SNS Topic"
-    Default: "arn:aws:sns:us-east-1:355364402302:PhotoOps-tom-PhotoOpsIngestTopic-CSLJABPVSB2M"
+    Default: "arn:aws:sns:us-east-1:355364402302:PhotoOps-tom-PhotoOpsIngestTopic-8FJ5W1FWZQ29"
 
 Resources:
   S3Bucket:
