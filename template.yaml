@@ -21,12 +21,12 @@ Parameters:
   PhotoOpsAIRoleName:
     Type: String
     Description: "AWS Role name used by PhotoOpsAI"
-    Default: "PhotoOpsAI/PhotoOps-tom-GetExifData"
+    Default: "PhotoOpsAI/CrossAccountAccess-tom"
 
   PhotoOpsAISnsTopicArn:
     Type: String
     Description: "ARN of PhotoOpsAI SNS Topic"
-    Default: "arn:aws:sns:us-east-1:355364402302:PhotoOps-tom-PhotoOpsIngestTopic-8FJ5W1FWZQ29"
+    Default: "arn:aws:sns:us-east-1:355364402302:PhotoOps-tom-PhotoOpsIngestTopic"
 
 Resources:
   S3Bucket:
